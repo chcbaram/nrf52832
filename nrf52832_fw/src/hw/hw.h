@@ -15,7 +15,7 @@
 #include "led.h"
 #include "bleuart.h"
 #include "uart.h"
-
+#include "cli.h"
 
 
 void hwInit(void);

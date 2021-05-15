@@ -25,6 +25,8 @@
 #include "nrf_gpio.h"
 #include "nrf_sdm.h"
 #include "nrf_mbr.h"
+#include "nrf_nvic.h"
+
 
 #include "nrfx_clock.h"
 
