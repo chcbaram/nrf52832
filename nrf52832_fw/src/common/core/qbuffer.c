@@ -64,6 +64,7 @@ bool qbufferWrite(qbuffer_t *p_node, uint8_t *p_data, uint32_t length)
         {
           p_buf[i] = p_data[i];
         }
+        p_data += p_node->size;
       }
       p_node->in = next_in;
     }
@@ -93,6 +94,7 @@ bool qbufferRead(qbuffer_t *p_node, uint8_t *p_data, uint32_t length)
       {
         p_data[i] = p_buf[i];
       }
+      p_data += p_node->size;
     }
 
     if (p_node->out != p_node->in)

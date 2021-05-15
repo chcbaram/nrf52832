@@ -14,8 +14,17 @@
 
 #ifdef _USE_HW_BLEUART
 
+#define BLEUART_MAX_BUF_LEN     HW_BLEUART_MAX_BUF_LEN
+
 
 bool bleUartInit(void);
+bool bleUartIsInit(void);
+bool bleUartIsConnect(void);
+
+uint32_t bleUartAvailable(void);
+bool     bleUartFlush(void);
+uint8_t  bleUartRead(void);
+uint32_t bleUartWrite(uint8_t *p_data, uint32_t length);
 
 #endif
 

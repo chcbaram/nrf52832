@@ -18,4 +18,6 @@ void hwInit(void)
 
   ledInit();
   bleUartInit();
+  uartInit();
+  uartOpen(_DEF_UART1, 57600);
 }

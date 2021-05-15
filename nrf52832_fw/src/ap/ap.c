@@ -29,6 +29,15 @@ void apMain(void)
       pre_time = millis();
       ledToggle(_DEF_LED1);
     }
+
+    if (uartAvailable(_DEF_UART1) > 0)
+    {
+      uint8_t rx_data;
+
+      rx_data = uartRead(_DEF_UART1);
+
+      uartPrintf(_DEF_UART1, "BleRx : 0x%X(%c)\n", rx_data, rx_data);
+    }
   }
 }
 

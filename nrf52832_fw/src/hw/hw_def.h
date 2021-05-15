@@ -14,12 +14,15 @@
 
 
 
-#define _USE_HW_BLEUART
-
 
 #define _USE_HW_LED
 #define      HW_LED_MAX_CH          5
 
+#define _USE_HW_BLEUART
+#define      HW_BLEUART_MAX_BUF_LEN 1024
+
+#define _USE_HW_UART
+#define      HW_UART_MAX_CH         1
 
 
 
