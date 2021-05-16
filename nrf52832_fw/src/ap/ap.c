@@ -9,17 +9,31 @@
 #include "ap.h"
 
 
-
+void ledISR(void *args)
+{
+  ledToggle(_DEF_LED3);
+}
 
 
 void apInit(void)
 {
+  swtimer_handle_t h_led;
+
   cliOpen(_DEF_UART2, 57600);
+
+  h_led = swtimerGetHandle();
+  swtimerSet(h_led, 1000, LOOP_TIME, ledISR, NULL);
+  swtimerStart(h_led);
 }
 
 void apMain(void)
 {
   uint32_t pre_time;
+  button_obj_t btn;
+  uint16_t     btn_count = 0;
+
+
+  buttonObjCreate(&btn, 0, 200);
 
 
   pre_time = millis();
@@ -32,13 +46,10 @@ void apMain(void)
     }
     cliMain();
 
-    if (uartAvailable(_DEF_UART1) > 0)
+    if (buttonObjGetClicked(&btn, 60) == true)
     {
-      uint8_t rx_data;
-
-      rx_data = uartRead(_DEF_UART1);
-
-      uartPrintf(_DEF_UART1, "BleRx : 0x%X(%c)\n", rx_data, rx_data);
+      btn_count++;
+      logPrintf("ButtonClicked %d\n", btn_count);
     }
   }
 }

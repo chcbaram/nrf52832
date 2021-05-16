@@ -11,13 +11,14 @@
 
 #include "def.h"
 
-
-#define _USE_LOG_PRINT    1
+#if 0
+#define _USE_LOG_PRINT    0
 
 #if _USE_LOG_PRINT
 #define logPrintf(fmt, ...)     printf(fmt, ##__VA_ARGS__)
 #else
 #define logPrintf(fmt, ...)
+#endif
 #endif
 
 

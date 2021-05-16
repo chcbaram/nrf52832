@@ -9,13 +9,17 @@
 #include "bsp.h"
 
 
+
 extern uint32_t __isr_vector_addr;
 volatile uint32_t systick_ms = 0;
+
+extern void swtimerISR(void);
 
 
 void SysTick_Handler(void)
 {
   systick_ms++;
+  swtimerISR();
 }
 
 

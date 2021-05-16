@@ -16,6 +16,9 @@
 #include "bleuart.h"
 #include "uart.h"
 #include "cli.h"
+#include "log.h"
+#include "swtimer.h"
+#include "button.h"
 
 
 void hwInit(void);

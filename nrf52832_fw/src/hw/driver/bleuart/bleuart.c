@@ -9,6 +9,8 @@
 #include "bleuart.h"
 #include "led.h"
 #include "qbuffer.h"
+#include "cli.h"
+#include "swtimer.h"
 
 #include "app_timer.h"
 
@@ -75,6 +77,15 @@ static bool is_q_rx_over = false;
 static volatile bool is_ready_to_send = false;
 
 
+#define BLEUART_TX_POWER_INIT           8   // 4dB
+#define BLEUART_TX_POWER_LEVEL_MAX      9
+                                                            //    0    1    2    3   4   5  6  7  8
+static const int8_t tx_power_tbl[BLEUART_TX_POWER_LEVEL_MAX] = {-40, -20, -16, -12, -8, -4, 0, 3, 4, };
+static volatile int8_t ble_conn_tx_power_level = BLEUART_TX_POWER_INIT;
+
+static volatile uint32_t app_timer_count = 0;
+
+
 static bool ble_stack_init(void);
 static bool gap_params_init(void);
 static bool gatt_init(void);
@@ -91,12 +102,18 @@ static void handler_on_adv_evt(ble_adv_evt_t ble_adv_evt);
 static void handler_on_conn_params_evt(ble_conn_params_evt_t * p_evt);
 static void handler_conn_params_error(uint32_t nrf_error);
 
+static void appTimerISR(void *args);
 
+
+#ifdef _USE_HW_CLI
+static void cliCmd(cli_args_t *args);
+#endif
 
 
 bool bleUartInit(void)
 {
   bool ret = true;
+  swtimer_handle_t h_timer;
 
   qbufferCreate(&q_rx, q_buf_rx, BLEUART_MAX_BUF_LEN);
   qbufferCreate(&q_tx, q_buf_tx, BLEUART_MAX_BUF_LEN);
@@ -111,6 +128,17 @@ bool bleUartInit(void)
 
   is_init = ret;
 
+
+  cliOpen(_DEF_UART2, 57600);
+
+  h_timer = swtimerGetHandle();
+  swtimerSet(h_timer, 1, LOOP_TIME, appTimerISR, NULL);
+  swtimerStart(h_timer);
+
+
+#ifdef _USE_HW_CLI
+  cliAdd("ble", cliCmd);
+#endif
   return ret;
 }
 
@@ -122,6 +150,29 @@ bool bleUartIsInit(void)
 bool bleUartIsConnect(void)
 {
   return is_connect;
+}
+
+bool bleUartGetRssi(ble_uart_rssi_t *p_rssi)
+{
+  bool ret = false;
+  uint32_t err_code;
+
+  if (is_connect == true && m_conn_handle != BLE_CONN_HANDLE_INVALID)
+  {
+    err_code = sd_ble_gap_rssi_get(m_conn_handle, &p_rssi->rssi, &p_rssi->ch_index);
+    if (err_code == NRF_SUCCESS)
+    {
+      ret = true;
+    }
+  }
+
+  if (ret != true)
+  {
+    p_rssi->rssi = 0;
+    p_rssi->ch_index = 0;
+  }
+
+  return ret;
 }
 
 uint32_t bleUartAvailable(void)
@@ -359,18 +410,21 @@ void handler_ble_evt(ble_evt_t const * p_ble_evt, void * p_context)
   {
     case BLE_GAP_EVT_CONNECTED:
       NRF_LOG_INFO("Connected");
-      //err_code = bsp_indication_set(BSP_INDICATE_CONNECTED);
       APP_ERROR_CHECK(err_code);
       m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
       err_code = nrf_ble_qwr_conn_handle_assign(&m_qwr, m_conn_handle);
       APP_ERROR_CHECK(err_code);
+
       ledOn(_DEF_LED2);
       is_connect = true;
+      err_code = sd_ble_gap_rssi_start(m_conn_handle, 10, 0);
+      err_code = sd_ble_gap_tx_power_set(BLE_GAP_TX_POWER_ROLE_CONN, m_conn_handle, tx_power_tbl[ble_conn_tx_power_level]);
       break;
 
     case BLE_GAP_EVT_DISCONNECTED:
       NRF_LOG_INFO("Disconnected");
       // LED indication will be changed when advertising starts.
+      err_code = sd_ble_gap_rssi_stop(m_conn_handle);
       m_conn_handle = BLE_CONN_HANDLE_INVALID;
       ledOff(_DEF_LED2);
       is_connect = false;
@@ -492,6 +546,50 @@ void handler_conn_params_error(uint32_t nrf_error)
   APP_ERROR_HANDLER(nrf_error);
 }
 
+void appTimerISR(void *args)
+{
+  app_timer_update();
+  app_timer_count++;
+}
+
+
+
+#ifdef _USE_HW_CLI
+void cliCmd(cli_args_t *args)
+{
+  bool ret = false;
+
+
+  if (args->argc == 1 && args->isStr(0, "info"))
+  {
+    uint32_t cursor_move = 5;
+    ble_uart_rssi_t rssi;
+
+
+    while(cliKeepLoop())
+    {
+      bleUartGetRssi(&rssi);
+
+      cliPrintf("BLE Init    : %d\n", is_init);
+      cliPrintf("BLE Connect : %d\n", is_connect);
+      cliPrintf("BLE Rssi    : %d dB, %d   \n", rssi.rssi, rssi.ch_index);
+      cliPrintf("BLE TxPower : %d dB  \n", tx_power_tbl[ble_conn_tx_power_level]);
+      cliPrintf("BLE AppTimer: %d     \n", app_timer_count % 10000);
+      cliPrintf("\x1B[%dA", cursor_move);
+      delay(100);
+    }
+    cliPrintf("\x1B[%dB", cursor_move);
+
+    ret = true;
+  }
+
+
+  if (ret == false)
+  {
+    cliPrintf("ble info\n");
+  }
+}
+#endif
 
 
 

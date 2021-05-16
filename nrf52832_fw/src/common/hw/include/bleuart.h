@@ -17,9 +17,16 @@
 #define BLEUART_MAX_BUF_LEN     HW_BLEUART_MAX_BUF_LEN
 
 
+typedef struct
+{
+  int8_t  rssi;
+  uint8_t ch_index;
+} ble_uart_rssi_t;
+
 bool bleUartInit(void);
 bool bleUartIsInit(void);
 bool bleUartIsConnect(void);
+bool bleUartGetRssi(ble_uart_rssi_t *p_rssi);
 
 uint32_t bleUartAvailable(void);
 bool     bleUartFlush(void);
