@@ -20,6 +20,7 @@ void hwInit(void)
   logInit();
   cliInit();
   ledInit();
+  adcInit();
   buttonInit();
   bleUartInit();
   uartInit();

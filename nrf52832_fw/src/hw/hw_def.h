@@ -39,6 +39,12 @@
 #define _USE_HW_BUTTON
 #define      HW_BUTTON_MAX_CH       5
 
+#define _USE_HW_ADC
+#define      HW_ADC_MAX_CH          3
+
+
+#define _USE_PPI_ADC_0              0
+#define _USE_PPI_ADC_1              1
 
 
 

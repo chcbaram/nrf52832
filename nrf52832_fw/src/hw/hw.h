@@ -19,7 +19,7 @@
 #include "log.h"
 #include "swtimer.h"
 #include "button.h"
-
+#include "adc.h"
 
 void hwInit(void);
 
