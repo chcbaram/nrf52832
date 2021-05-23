@@ -53,6 +53,11 @@
 #define _DEF_PWM3             2
 #define _DEF_PWM4             3
 
+#define _DEF_TIMER1           0
+#define _DEF_TIMER2           1
+#define _DEF_TIMER3           2
+#define _DEF_TIMER4           3
+
 #define _DEF_LOW              0
 #define _DEF_HIGH             1
 

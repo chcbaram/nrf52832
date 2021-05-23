@@ -14,7 +14,6 @@ void ledISR(void *args)
   ledToggle(_DEF_LED3);
 }
 
-
 void apInit(void)
 {
   swtimer_handle_t h_led;

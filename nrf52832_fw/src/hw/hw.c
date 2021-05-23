@@ -9,12 +9,19 @@
 #include "hw.h"
 
 
+static void timerISR(void *arg);
+
 
 
 
 void hwInit(void)
 {
   bspInit();
+
+  timerInit();
+  timerSetPeriod(_DEF_TIMER1, 1000);
+  timerSetISR(_DEF_TIMER1, timerISR, NULL);
+  timerStart(_DEF_TIMER1);
 
   swtimerInit();
   logInit();
@@ -29,4 +36,9 @@ void hwInit(void)
 
   logPrintf("\n");
   logPrintf("[ Firmware Begin... ]\r\n");
+}
+
+void timerISR(void *arg)
+{
+  swtimerISR();
 }

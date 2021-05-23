@@ -20,6 +20,7 @@
 #include "swtimer.h"
 #include "button.h"
 #include "adc.h"
+#include "timer.h"
 
 void hwInit(void);
 
