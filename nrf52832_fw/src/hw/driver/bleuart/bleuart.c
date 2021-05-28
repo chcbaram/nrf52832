@@ -19,6 +19,7 @@
 #include "ble_nus.h"
 #include "ble_advertising.h"
 #include "ble_conn_params.h"
+#include "ble_dfu.h"
 
 #include "nrf_ble_gatt.h"
 #include "nrf_ble_qwr.h"
@@ -101,6 +102,8 @@ static void handler_nus_data(ble_nus_evt_t * p_evt);
 static void handler_on_adv_evt(ble_adv_evt_t ble_adv_evt);
 static void handler_on_conn_params_evt(ble_conn_params_evt_t * p_evt);
 static void handler_conn_params_error(uint32_t nrf_error);
+static void handler_ble_dfu_evt(ble_dfu_buttonless_evt_type_t event);
+
 
 static void appTimerISR(void *args);
 
@@ -318,6 +321,7 @@ bool services_init(void)
 {
   ble_nus_init_t     nus_init;
   nrf_ble_qwr_init_t qwr_init = {0};
+  ble_dfu_buttonless_init_t dfus_init = {0};
 
 
   if (err_code_init != NRF_SUCCESS) return false;
@@ -334,6 +338,12 @@ bool services_init(void)
   nus_init.data_handler = handler_nus_data;
 
   err_code_init = ble_nus_init(&m_nus, &nus_init);
+  if (err_code_init != NRF_SUCCESS) return false;
+
+
+  // Initialize Buttonless DFU.
+  dfus_init.evt_handler = handler_ble_dfu_evt;
+  err_code_init = ble_dfu_buttonless_init(&dfus_init);
   if (err_code_init != NRF_SUCCESS) return false;
 
   return true;
@@ -544,6 +554,77 @@ void handler_on_conn_params_evt(ble_conn_params_evt_t * p_evt)
 void handler_conn_params_error(uint32_t nrf_error)
 {
   APP_ERROR_HANDLER(nrf_error);
+}
+
+static void advertising_config_get(ble_adv_modes_config_t * p_config)
+{
+    memset(p_config, 0, sizeof(ble_adv_modes_config_t));
+
+    p_config->ble_adv_fast_enabled  = true;
+    p_config->ble_adv_fast_interval = APP_ADV_INTERVAL;
+    p_config->ble_adv_fast_timeout  = APP_ADV_DURATION;
+}
+
+static void disconnect(uint16_t conn_handle, void * p_context)
+{
+    UNUSED_PARAMETER(p_context);
+
+    ret_code_t err_code = sd_ble_gap_disconnect(conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
+    if (err_code != NRF_SUCCESS)
+    {
+        NRF_LOG_WARNING("Failed to disconnect connection. Connection handle: %d Error: %d", conn_handle, err_code);
+    }
+    else
+    {
+        NRF_LOG_DEBUG("Disconnected connection handle %d", conn_handle);
+    }
+}
+
+void handler_ble_dfu_evt(ble_dfu_buttonless_evt_type_t event)
+{
+    switch (event)
+    {
+        case BLE_DFU_EVT_BOOTLOADER_ENTER_PREPARE:
+        {
+            NRF_LOG_INFO("Device is preparing to enter bootloader mode.");
+
+            // Prevent device from advertising on disconnect.
+            ble_adv_modes_config_t config;
+            advertising_config_get(&config);
+            config.ble_adv_on_disconnect_disabled = true;
+            ble_advertising_modes_config_set(&m_advertising, &config);
+
+            // Disconnect all other bonded devices that currently are connected.
+            // This is required to receive a service changed indication
+            // on bootup after a successful (or aborted) Device Firmware Update.
+            uint32_t conn_count = ble_conn_state_for_each_connected(disconnect, NULL);
+            NRF_LOG_INFO("Disconnected %d links.", conn_count);
+            break;
+        }
+
+        case BLE_DFU_EVT_BOOTLOADER_ENTER:
+            // YOUR_JOB: Write app-specific unwritten data to FLASH, control finalization of this
+            //           by delaying reset by reporting false in app_shutdown_handler
+            NRF_LOG_INFO("Device will enter bootloader mode.");
+            break;
+
+        case BLE_DFU_EVT_BOOTLOADER_ENTER_FAILED:
+            NRF_LOG_ERROR("Request to enter bootloader mode failed asynchroneously.");
+            // YOUR_JOB: Take corrective measures to resolve the issue
+            //           like calling APP_ERROR_CHECK to reset the device.
+            break;
+
+        case BLE_DFU_EVT_RESPONSE_SEND_ERROR:
+            NRF_LOG_ERROR("Request to send a response to client failed.");
+            // YOUR_JOB: Take corrective measures to resolve the issue
+            //           like calling APP_ERROR_CHECK to reset the device.
+            APP_ERROR_CHECK(false);
+            break;
+
+        default:
+            NRF_LOG_ERROR("Unknown event from ble_dfu_buttonless.");
+            break;
+    }
 }
 
 void appTimerISR(void *args)
