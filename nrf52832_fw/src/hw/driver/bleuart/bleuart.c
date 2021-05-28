@@ -20,6 +20,7 @@
 #include "ble_advertising.h"
 #include "ble_conn_params.h"
 #include "ble_dfu.h"
+#include "ble_dis.h"
 
 #include "nrf_ble_gatt.h"
 #include "nrf_ble_qwr.h"
@@ -33,6 +34,9 @@
 #define APP_BLE_CONN_CFG_TAG            1                                           /**< A tag identifying the SoftDevice BLE configuration. */
 
 #define DEVICE_NAME                     "Nordic_UART"                               /**< Name of device. Will be included in the advertising data. */
+#define MANUFACTURER_NAME               "NordicSemiconductor"                       /**< Manufacturer. Will be passed to Device Information Service. */
+#define MODEL_NUM                       "nRF52832 DMTECH"                           /**< Model Number string. Will be passed to Device Information Service. */
+#define VERSION_NUM                     "V210529R1"
 #define NUS_SERVICE_UUID_TYPE           BLE_UUID_TYPE_VENDOR_BEGIN                  /**< UUID type for the Nordic UART Service (vendor specific). */
 
 #define APP_BLE_OBSERVER_PRIO           3                                           /**< Application's BLE observer priority. You shouldn't need to modify this value. */
@@ -322,6 +326,7 @@ bool services_init(void)
   ble_nus_init_t     nus_init;
   nrf_ble_qwr_init_t qwr_init = {0};
   ble_dfu_buttonless_init_t dfus_init = {0};
+  ble_dis_init_t     dis_init = {0};
 
 
   if (err_code_init != NRF_SUCCESS) return false;
@@ -344,6 +349,19 @@ bool services_init(void)
   // Initialize Buttonless DFU.
   dfus_init.evt_handler = handler_ble_dfu_evt;
   err_code_init = ble_dfu_buttonless_init(&dfus_init);
+  if (err_code_init != NRF_SUCCESS) return false;
+
+
+  // Initialize Device Information Service.
+  memset(&dis_init, 0, sizeof(dis_init));
+
+  ble_srv_ascii_to_utf8(&dis_init.manufact_name_str, (char *)MANUFACTURER_NAME);
+  ble_srv_ascii_to_utf8(&dis_init.model_num_str, (char *)MODEL_NUM);
+  ble_srv_ascii_to_utf8(&dis_init.fw_rev_str, (char *)VERSION_NUM);
+
+  dis_init.dis_char_rd_sec = SEC_OPEN;
+
+  err_code_init = ble_dis_init(&dis_init);
   if (err_code_init != NRF_SUCCESS) return false;
 
   return true;
