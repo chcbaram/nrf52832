@@ -27,7 +27,7 @@
 #include "nrf_sdm.h"
 #include "nrf_mbr.h"
 #include "nrf_nvic.h"
-
+#include "nrf_sdh_soc.h"
 
 #include "nrfx_clock.h"
 

@@ -21,6 +21,8 @@
 #include "button.h"
 #include "adc.h"
 #include "timer.h"
+#include "flash.h"
+
 
 void hwInit(void);
 
