@@ -11,6 +11,7 @@
 #include "qbuffer.h"
 #include "cli.h"
 #include "swtimer.h"
+#include "fs.h"
 
 #include "app_timer.h"
 
@@ -284,15 +285,40 @@ bool gap_params_init(void)
   ble_gap_conn_params_t   gap_conn_params;
   ble_gap_conn_sec_mode_t sec_mode;
 
+  char *bd_name_str = (char *)DEVICE_NAME;
+  char bd_name[128];
+  int32_t bd_name_size = 0;
+
 
   if (err_code_init != NRF_SUCCESS) return false;
+
+
+  if (fsIsExist("bd_name") == true)
+  {
+    fs_t fs;
+
+    if (fsFileOpen(&fs, "bd_name") == true)
+    {
+      bd_name_size = fsFileSize(&fs);
+
+      if (bd_name_size > 0)
+      {
+        fsFileRead(&fs, (uint8_t *)bd_name, bd_name_size);
+        bd_name[bd_name_size] = 0;
+
+        bd_name_str = bd_name;
+      }
+
+      fsFileClose(&fs);
+    }
+  }
 
 
   BLE_GAP_CONN_SEC_MODE_SET_OPEN(&sec_mode);
 
   err_code_init = sd_ble_gap_device_name_set(&sec_mode,
-                                        (const uint8_t *) DEVICE_NAME,
-                                        strlen(DEVICE_NAME));
+                                        (const uint8_t *) bd_name_str,
+                                        strlen(bd_name_str));
   if (err_code_init != NRF_SUCCESS) return false;
 
   memset(&gap_conn_params, 0, sizeof(gap_conn_params));

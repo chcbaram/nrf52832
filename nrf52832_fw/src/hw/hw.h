@@ -22,6 +22,7 @@
 #include "adc.h"
 #include "timer.h"
 #include "flash.h"
+#include "fs.h"
 
 
 void hwInit(void);

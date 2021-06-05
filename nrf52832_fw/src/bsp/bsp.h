@@ -19,6 +19,8 @@
 #else
 #define logPrintf(fmt, ...)
 #endif
+#else
+void logPrintf(const char *fmt, ...);
 #endif
 
 

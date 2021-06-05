@@ -46,6 +46,10 @@
 #define _USE_HW_TIMER
 #define      HW_TIMER_MAX_CH        1
 
+#define _USE_HW_FS
+#define      HW_FS_MAX_SIZE         (32*1024)
+
+
 
 #define _USE_PPI_ADC_0              0
 #define _USE_PPI_ADC_1              1

@@ -29,14 +29,16 @@ void hwInit(void)
   ledInit();
   adcInit();
   buttonInit();
-  bleUartInit();
-  flashInit();
   uartInit();
   uartOpen(_DEF_UART1, 57600);
   uartOpen(_DEF_UART2, 57600);
 
   logPrintf("\n");
   logPrintf("[ Firmware Begin... ]\r\n");
+
+  flashInit();
+  fsInit();
+  bleUartInit();
 }
 
 void timerISR(void *arg)
