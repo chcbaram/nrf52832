@@ -25,6 +25,7 @@ typedef struct
 } button_obj_t;
 
 bool buttonInit(void);
+bool buttonToSleep(void);
 bool buttonGetPressed(uint8_t ch);
 
 void buttonObjCreate(button_obj_t *p_obj, uint8_t ch, uint32_t repeat_time);

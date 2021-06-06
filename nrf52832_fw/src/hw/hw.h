@@ -23,6 +23,8 @@
 #include "timer.h"
 #include "flash.h"
 #include "fs.h"
+#include "sleep.h"
+#include "reset.h"
 
 
 void hwInit(void);

@@ -52,6 +52,27 @@ bool buttonInit(void)
   return ret;
 }
 
+bool buttonToSleep(void)
+{
+  for (int i=0; i<BUTTON_MAX_CH; i++)
+  {
+    nrf_gpio_pin_sense_t sense;
+
+    if (button_tbl[i].on_state == 1)
+    {
+      sense = NRF_GPIO_PIN_SENSE_HIGH;
+    }
+    else
+    {
+      sense = NRF_GPIO_PIN_SENSE_LOW;
+    }
+
+    nrf_gpio_cfg_sense_set(button_tbl[i].pin, sense);
+  }
+
+  return true;
+}
+
 bool buttonGetPressed(uint8_t ch)
 {
   bool ret = false;

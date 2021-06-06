@@ -53,6 +53,17 @@ bool ledInit(void)
   return ret;
 }
 
+bool ledToSleep(void)
+{
+  for (int i=0; i<LED_MAX_CH; i++)
+  {
+    ledOff(i);
+    nrf_gpio_cfg_default(led_tbl[i].pin);
+  }
+
+  return true;
+}
+
 void ledOn(uint8_t ch)
 {
   if (ch >= LED_MAX_CH) return;

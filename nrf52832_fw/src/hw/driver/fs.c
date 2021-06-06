@@ -108,18 +108,18 @@ bool fsInit(void)
     err = lfs_format(&lfs, &cfg);
     if (err == LFS_ERR_OK)
     {
-      logPrintf("fs format      \t\t: OK\r\n");
+      logPrintf("fs format      \t: OK\r\n");
     }
     else
     {
-      logPrintf("fs format      \t\t: Fail\r\n");
+      logPrintf("fs format      \t: Fail\r\n");
     }
     err = lfs_mount(&lfs, &cfg);
   }
 
   if (err == LFS_ERR_OK)
   {
-    logPrintf("fs mount     \t\t: OK\r\n");
+    logPrintf("fs mount     \t: OK\r\n");
   }
   else
   {
@@ -146,7 +146,7 @@ bool fsInit(void)
 
         fsFileRead(&fs, (uint8_t *)bd_name, 128);
 
-        logPrintf("bd_name      \t\t: %s\r\n", bd_name);
+        logPrintf("bd_name      \t: %s\r\n", bd_name);
 
         fsFileClose(&fs);
       }

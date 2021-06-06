@@ -16,6 +16,10 @@ static void timerISR(void *arg);
 
 void hwInit(void)
 {
+  uint32_t pre_time;
+  uint32_t exe_time;
+
+  pre_time = millis();
   bspInit();
 
   timerInit();
@@ -23,9 +27,11 @@ void hwInit(void)
   timerSetISR(_DEF_TIMER1, timerISR, NULL);
   timerStart(_DEF_TIMER1);
 
+
   swtimerInit();
   logInit();
   cliInit();
+  resetInit();
   ledInit();
   adcInit();
   buttonInit();
@@ -35,10 +41,16 @@ void hwInit(void)
 
   logPrintf("\n");
   logPrintf("[ Firmware Begin... ]\r\n");
-
+  resetLog();
   flashInit();
   fsInit();
   bleUartInit();
+
+  sleepInit();
+
+  exe_time = millis()-pre_time;
+
+  logPrintf("boot time \t: %d ms\r\n", exe_time);
 }
 
 void timerISR(void *arg)
