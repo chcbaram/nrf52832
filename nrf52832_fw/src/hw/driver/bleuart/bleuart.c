@@ -210,7 +210,6 @@ uint32_t bleUartWrite(uint8_t *p_data, uint32_t length)
   uint32_t sent_len;
   uint16_t tx_len;
   uint32_t err_code;
-  uint8_t *p_tx_buf;
   uint32_t pre_time;
 
 
@@ -221,18 +220,15 @@ uint32_t bleUartWrite(uint8_t *p_data, uint32_t length)
 
   while(sent_len < length)
   {
-    p_tx_buf = &p_data[sent_len];
-    tx_len = length;
+    tx_len = length - sent_len;
     if (tx_len > m_ble_nus_max_data_len)
     {
       tx_len = m_ble_nus_max_data_len;
     }
 
     is_ready_to_send = false;
-    err_code = ble_nus_data_send(&m_nus, p_tx_buf, &tx_len, m_conn_handle);
-    if ((err_code != NRF_ERROR_INVALID_STATE) &&
-        (err_code != NRF_ERROR_RESOURCES) &&
-        (err_code != NRF_ERROR_NOT_FOUND))
+    err_code = ble_nus_data_send(&m_nus, &p_data[sent_len], &tx_len, m_conn_handle);
+    if (err_code != NRF_SUCCESS)
     {
       break;
     }
@@ -242,6 +238,7 @@ uint32_t bleUartWrite(uint8_t *p_data, uint32_t length)
     {
       if (is_ready_to_send == true)
       {
+        sent_len += tx_len;
         break;
       }
       if (is_connect != true)
@@ -250,7 +247,7 @@ uint32_t bleUartWrite(uint8_t *p_data, uint32_t length)
       }
     }
 
-    if (is_ready_to_send != true)
+    if (is_ready_to_send != true || is_connect != true)
     {
       break;
     }
