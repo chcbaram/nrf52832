@@ -73,12 +73,12 @@ void resetToBoot(uint32_t timeout)
 {
   sd_power_gpregret_clr(0, 0xffffffff);
   sd_power_gpregret_set(0, BOOTLOADER_DFU_START);
+  NVIC_SystemReset();
 }
 
 void resetToReboot(reset_mode_t mode)
 {
-  sd_power_gpregret_clr(1, 0xffffffff);
-  sd_power_gpregret_set(1, mode);
+  resetSetMode(mode);
   NVIC_SystemReset();
 }
 
