@@ -33,6 +33,7 @@ void hwInit(void)
   cliInit();
   resetInit();
   ledInit();
+  gpioInit();
   adcInit();
   buttonInit();
   uartInit();
@@ -44,6 +45,7 @@ void hwInit(void)
   resetLog();
   flashInit();
   fsInit();
+  spiFlashInit();
   bleUartInit();
 
   sleepInit();

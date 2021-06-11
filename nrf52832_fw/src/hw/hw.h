@@ -25,6 +25,9 @@
 #include "fs.h"
 #include "sleep.h"
 #include "reset.h"
+#include "gpio.h"
+#include "spi_flash.h"
+
 
 
 void hwInit(void);

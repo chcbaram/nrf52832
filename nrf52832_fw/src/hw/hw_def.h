@@ -16,6 +16,7 @@
 #define _USE_HW_FLASH
 #define _USE_HW_SLEEP
 #define _USE_HW_RESET
+#define _USE_HW_SPI_FLASH
 
 
 #define _USE_HW_LED
@@ -51,6 +52,8 @@
 #define _USE_HW_FS
 #define      HW_FS_MAX_SIZE         (32*1024)
 
+#define _USE_HW_GPIO
+#define      HW_GPIO_MAX_CH         1
 
 
 #define _USE_PPI_ADC_0              0
@@ -58,6 +61,8 @@
 
 #define _USE_TIMER_TIMER_0          NRF_TIMER1
 
+
+#define _PIN_GPIO_SPI_FLASH_CS      0
 
 
 #endif /* SRC_HW_HW_DEF_H_ */
