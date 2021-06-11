@@ -18,7 +18,7 @@
 
 static bool is_init = false;
 
-static NRF_SPIM_Type *p_spi = NRF_SPIM1;
+static NRF_SPIM_Type *p_spi = NRF_SPIM0;
 
 
 static bool spiFlashTransfer(uint8_t *tx_buf, uint8_t *rx_buf, uint32_t length, uint32_t timeout);
